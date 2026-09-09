@@ -1,37 +1,150 @@
-from functions.preprocessing_data import read_json_and_convert_to_dataframe, generate_wordcloud, combine_dataframes, star_rating_distribution_viz, star_rating_review_length_correlation
-import pandas as pd 
-file = 'data/negative_reviews.json'
-file1 = 'data/positive_reviews.json'
+from flask import Flask, render_template, request, redirect, url_for
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+from functions.prediction_class import predict_reviews
+import plotly.express as px
+import plotly.graph_objects as go
+app = Flask(__name__)
+df_aspect = pd.read_csv('data/golden_standard/model_one_dataset.csv',sep=';', index_col=0)
+df_polarity = pd.read_csv('data/golden_standard/model_two_dataset.csv',sep=';', index_col=0)
+UPLOAD_FOLDER = 'dashboard_data'
+OUTPUT_FOLDER = 'predicted_output'
+ASPECT_COLUMNS = ["design", "functionalitate", "livrare_ambalaj", "calitate_pret", "satisfactie_generala"]
+POLARITY_MAPPING = {0:'Absent',1:'Negative',2:'Positive'}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-if __name__ == "__main__":
 
-    # generate_wordcloud(file,None,save_path='images/wordclouds/negative_reviews.png',viz_name="LaRoSeDa Negative Reviews Word Cloud Visualization")
-    # generate_wordcloud(file1,None,save_path='images/wordclouds/positive_reviews.png',viz_name="LaRoSeDa Positive Reviews Word Cloud Visualization")
+@app.route('/')
+def index():
+    return render_template('index.html', page_name='Homepage')
 
-    # Dataframes combination and saving to csv file
-    # df = read_json_and_convert_to_dataframe(file)
-    # df1 = read_json_and_convert_to_dataframe(file1)
+@app.route('/dashboard/<filename>')
+def dashboard(filename):
+    filepath = os.path.join(OUTPUT_FOLDER, filename)
 
-    # combined_df = combine_dataframes(df, df1, save_path='data/combined_reviews.csv')
+    df = pd.read_csv(filepath, sep=";")
+    dataset_fig = go.Figure(data=[go.Table(
+    header=dict(values=list(df.columns),
+                fill_color='#4AA1FF',
+                align='left'),
+    cells=dict(values=[df.content, df.design, df.functionalitate,df.livrare_ambalaj,df.calitate_pret,df.satisfactie_generala],
+               fill_color="#B3D5FF",
+               align='left'))
+    ])
+    dataset_fig.update_layout(width=1100,height=550)
+    dataset_fig = dataset_fig.to_html()
 
-    # data = pd.read_csv('data/combined_reviews.csv')
-    # print(data.head())
-    # print(data.info())
+    # Aspect df create for the Aspect barchart graph
+    aspect_df =(df[ASPECT_COLUMNS].melt(var_name='Aspect',value_name='Aspect_presence'))
+    aspect_df['Aspect_presence'] = aspect_df['Aspect_presence'].apply(lambda x: 'Absent' if x == 0 else 'Present')
 
-    # star_rating_distribution_viz(data, save_path='images/dataset/star_rating_distribution.png')
-    # star_rating_review_length_correlation(data, save_path='images/dataset/star_rating_review_length_correlation.png')
+    # Polarity df create for the Polarity stacked barchart graph
+    polarity_df = (df[ASPECT_COLUMNS].melt(var_name="Aspect", value_name="Polarity"))
+    polarity_df = polarity_df[polarity_df['Polarity'] != 0]
+    polarity_df["Polarity"] = polarity_df["Polarity"].map(POLARITY_MAPPING)
+
+    # Variables to automatically display on the report 
+    total_values = len(df[ASPECT_COLUMNS].values.flatten())
+
+    present_count = (df[ASPECT_COLUMNS] != 0).sum().sum()
+    absent_count = (df[ASPECT_COLUMNS] == 0).sum().sum()
+
+    present_percentage = round((present_count / total_values) * 100, 1)
+    absent_percentage = round((absent_count / total_values) * 100, 1)
     
-    data = pd.read_csv('data/combined_reviews.csv')
-    # Selecting  2000 reviews, 1000 positive and 1000 negative, out of the 1000 positive  25% will be from 4 stars and 75% from 5 stars, as from 1000 negative reviews 25% will be from 2 stars and 75% from 1 star for the ABSA annotation task and saving them as a new csv file and removing the original combined_reviews.csv and generate a new combined_reviews.csv file with the remaining reviews for future use in other tasks.
-    positive_reviews_4_stars = data[data['starRating'] == 4].sample(n=250, random_state=1)
-    positive_reviews_5_stars = data[data['starRating'] == 5].sample(n=750, random_state=1)
-    negative_reviews_1_star = data[data['starRating'] == 1].sample(n=750, random_state=1)
-    negative_reviews_2_stars = data[data['starRating'] == 2].sample(n=250, random_state=1)
-    selected_reviews = pd.concat([positive_reviews_4_stars, positive_reviews_5_stars, negative_reviews_1_star, negative_reviews_2_stars], ignore_index=True)
-    selected_reviews.to_csv('data/annotated_reviews.csv', index=False)
-    remaining_reviews = data.drop(selected_reviews.index)
-    remaining_reviews.to_csv('data/dataset_reviews.csv', index=False)
+    polarity_values = df[ASPECT_COLUMNS].values.flatten()
+    polarity_values = polarity_values[polarity_values != 0]
+
+    positive_count = (polarity_values == 2).sum()
+    negative_count = (polarity_values == 1).sum()
+    total_sentiment_polarity = positive_count + negative_count
+
+    positive_percentage = round((positive_count/total_sentiment_polarity)*100,1)
+    negative_percentage = round((negative_count/total_sentiment_polarity)*100,1)
+
+    if positive_count >= negative_count:
+        overall_sentiment = "POSITIVE"
+        overall_sentiment_percentage = positive_percentage
+
+    else:
+        overall_sentiment = "NEGATIVE"
+        overall_sentiment_percentage = negative_percentage
+
+    fig = px.histogram(
+        aspect_df,
+        x="Aspect",
+        color="Aspect_presence",
+        barmode="group",
+        color_discrete_map={
+                "Absent": "#F5E9D8",
+                "Present": "#2FA4D7"
+                },
+        title="Distribution of the Aspects detected in the reviews"
+    )
+    fig.update_layout(width=1100,height=550)
+    graph_html = fig.to_html()
+    
+    fig1 = px.histogram(
+        polarity_df,
+        y="Aspect",
+        color="Polarity",
+        barmode="group",
+        color_discrete_map={
+                "Negative": "#FF4A4A",
+                "Positive": "#2AD100",
+                },
+        title="Sentiment distribution of the present aspects detected in the reviews"
+    )
+    fig1.update_layout(width=1100,height=550)
+    graph_html1 = fig1.to_html()
+
+    return render_template(
+        'dashboard.html',
+        page_name='Dashboard',
+        filename=filename,
+        alt_tabel=dataset_fig,
+        graph1=graph_html,
+        graph2=graph_html1,
+        present_count=present_count,
+        absent_count=absent_count,
+        present_percentage=present_percentage,
+        absent_percentage=absent_percentage,
+        positive_count=positive_count,
+        negative_count=negative_count,
+        positive_percentage=positive_percentage,
+        negative_percentage=negative_percentage,
+        overall_sentiment = overall_sentiment,
+        overall_sentiment_percentage = overall_sentiment_percentage
+    )
+
+@app.route('/upload-csv', methods=['POST'])
+def upload_csv():
+    if "csv_file" not in request.files:
+        return "Error: There was no .csv file uploaded"
+
+    file = request.files["csv_file"]
+
+    filename = file.filename
+
+    filepath = os.path.join("dashboard_data", filename)
+
+    file.save(filepath)
+    number_files = len(os.listdir("./predicted_output"))
+    output_file=f"./predicted_output/{filename.replace('.csv', str(number_files) +'.csv')}"
+    # Reading the reviews from the saved .csv file
+    predict_reviews(
+        file_name=filepath,
+        output_file=output_file,
+        aspect_model_path="./results/readerbench/robert-base_fine_tuning/checkpoint-750", 
+        polarity_model_path="./results/readerbench/robert-base_", 
+        label_names=["content", "design", "functionalitate", "livrare_ambalaj", "calitate_pret", "satisfactie_generala"]
+        )
+
+    return {"redirect_url": url_for("dashboard", filename=f"{filename.replace('.csv', str(number_files) +'.csv')}")
+}
 
 
-
-
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8000, debug=True)

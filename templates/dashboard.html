@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+        <h1 class="page-title"><strong>Analysis Report</strong> for the {{ filename }} file</h1>
+        <p class="page-subtitle">The following table shows the aspects presence combined with the sentiment polarity as follows:</p>
+        <div style="display:flex; justify-content:center;">
+            <div style="width:80%;">
+                    <ul>
+                        <li>
+                            The value 0 represents the <b>absence</b> of the aspect.
+
+                        </li>
+
+                        <li>
+                            The value 1 represents the <b>negative</b> sentiment of the aspect.
+                        </li>
+
+                        <li>
+                            The value 2 represents the <b>positive</b> sentiment of the aspect.
+                        </li>
+                    </ul>
+                
+                {{ alt_tabel|safe }}
+
+                <br>
+        
+                <p>After the analysis, the overall ratio between presence and absence of the detected aspects is:
+                </p>
+                <ul>
+                    <li>
+                    Present with {{ present_percentage }}%
+                    ({{ present_count }})
+                    </li>
+
+                    <li>
+                    Absent with {{ absent_percentage }}%
+                    ({{ absent_count }})
+                    </li>
+                </ul>
+                <p>
+                    Below we have the distribution of the <b>"Aspects detected in the reviews"</b> histogram which displays in depth the distribution among the separate aspects:
+                </p>
+                
+                        {{ graph1 | safe }}
+            </div>
+        </div>
+    <br>
+    <div style="display:flex; justify-content:center;">
+        <div style="width:80%;">
+            <p>
+                Out of the detected present aspects, the overall sentiment polarity distribution is:
+            </p>
+            <ul>
+                <li>
+                    Positive with {{ positive_percentage }}%
+                    ({{ positive_count }})
+                </li>
+
+                <li>
+                    Negative with {{ negative_percentage }}%
+                    ({{ negative_count }})
+                </li>
+            </ul>
+            <p>
+                Below it can be observed the <b>"Sentiment distribution of the present aspects detected in the reviews"</b> histogram which displays a more detailed comparison among the separate aspects:
+            </p>
+            
+                    {{ graph2 | safe }}
+                
+            <br>
+            <h2>Conclusion</h2>
+
+            <p>
+                Based on the analyzed reviews, the overall users perception of the product can be classified as <b>{{ overall_sentiment }}</b>,
+                with <b>{{ overall_sentiment_percentage }}%</b> of the detected sentiments belonging to this category.
+            </p>
+            <br>
+        </div>
+    </div>
+{% endblock %}

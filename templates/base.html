@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Website{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/javascript/script.js" defer></script>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+    </nav>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>    
+</body>
+</html>

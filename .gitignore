@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+*.venv/
+
+
+test.py
+models/BART_MNLI_zero_few_shots/BART_MNLI_few.py
+models/BART_MNLI_zero_few_shots/BART_MNLI_zero.py
+results/google-bert/*
+reviews_multilabel_neutral_nodiacritics_pipe.csv
+results/bert_polarity_model/*
+results/bert-base-multilingual-uncased_fine_tuning/*
+results/bert-base-multilingual-uncased_fine_tuning_1/*
+results/bert-base-multilingual-uncased_fine_tuning_2/*
+results/readerbench/*
+GLiClass
+results/semi_supervised/*
+data_splitted/*

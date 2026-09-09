@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1 class="page-title top-header">Upload CSV File in order to analyze customer reviews</h1>
+    <p class="page-description">Please upload a CSV file containing customer reviews. The file should have a column named "review" that contains the text of the reviews.</p>
+    <p class="page-description">After uploading the file, you will be <b>redirected</b> to the generated report and gain insights into customer sentiment and feedback.</p>
+    <div class="csv-dropzone">
+        
+        <br>
+        <div class="file-input-container">
+        <input type="file" name="csvFile" id="csvFile" accept=".csv">
+        <label for="csvFile">Choose CSV File</label>
+        </div>
+
+
+    </div>
+{% endblock %}

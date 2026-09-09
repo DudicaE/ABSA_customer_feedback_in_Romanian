@@ -1,0 +1,41 @@
+
+Power is unscrapable is using API calls to bring the data I got stuck while trying to scrape the data even the request looks wierd.
+
+Wrangler is an API paid which can help me with the data overall but it's too expensive 100$ per month and 100.000 tokens 2.5 tokens per request it's enough but it only works at a time.
+
+Altex.ro is not even working on the request 
+
+Emag.com it worked the first time then it got cought by the bot after 2 instances. 
+Update I found the logic of the website in order to retrive the json and to call directly the reviews API 
+the logic is 
+https://www.emag.ro/product-feedback/televizor-lg-led-108-cm-smart-full-hd-clasa-f-43lr60006la/pd/DG76LL3BM/reviews/list
+[https://www.emag.ro/product-feedback/] + product name and codes which should be extracted from the link + /reviews/list
+This Links are examples of what it usually is and what we need to achieve in order to parse the website.
+url_base = "https://www.emag.ro/televizor-samsung-led-43u8092-108-cm-smart-4k-ultra-hd-clasa-g-model-2025-ue43u8092fuxxh/pd/DJ3GRT3BM/"
+
+usable_url = "https://www.emag.ro/product-feedback/televizor-lg-led-108-cm-smart-full-hd-clasa-f-43lr60006la/pd/DG76LL3BM/reviews/list"
+
+Sometimes it works sometimes it time's out me.
+
+I create a function to save the json file and to manipulate the link in order to download the entire thing and parse it later.
+
+Started with a manual retrieval of reviews and clean while coping the shortcuts or errors that have the potential to cause confusion in to the model
+
+Milestone achieved 500 reviews with the propotion from 1 star to 5 stars as:
+ 110⭐ - 37⭐⭐ - 100⭐⭐⭐ - 147⭐⭐⭐⭐ - 105⭐⭐⭐⭐⭐
+Corrected along the way shorcut words that might not be involved in the models or that can potentially confuse the model overall. 
+The way of selection is the following : select the product with a fair amount of comments then filter by the reviews score and take as many that are inteligible and relevant for the product. Then manually copying the content of the review number of stars and then the date which can help us later in case that the project might needs a different approach or the idea requires it.
+
+Annotation part is a bit difficult because the polarity of the users depends on the way they preceive the world and their biases. Therefore I will annotate as 1 or 0 for each class that is present which are product quality , product performence , delivery and packaging if present, user experience (which I might remove while testing do to the fact that is kind of the same as last class to be more precesise the last class incorporates the last one) and general satisfaction(usally this translates if overall the people are satisfied either by directly calling it out or my connecting the dots).
+The process of annotation sometimes might introduce my one bias in what I m preceive from the users comments.
+
+Fully annotated the data now preprocessing the data in order to use it for the zero and few shots models :
+Task cleaning the data - Removing the special characters out of the review text - Done ( Function was created in order to lowercase the text and to remove the special characters from the text).
+Analyzing the dataset. How by analyzing the distribution of the classes and their polarity among the manually annotated dataset(Under development)
+
+There were created functions in order to manage the zero/ few shot in 4 files which takes care of the model needs.
+First model which takes care of the aspect is multi-label aspect based zero/few shot.
+Second model which takes care of the polarity has an issue in analyzing the neutrality aspect since in the dataset there are not enough comments in order to analyse the neutral polarity. around 200 entries over the multilabel dataset with 200/5 aspects so out of 1000 entries only 50 and we don't even know about the distribution.
+
+Golden standard dataset : model_one_dataset.csv and model_two_dataset.csv from the manually annotate reviews from the annotated_reviews_LaRoSeDa.csv
+For the semi-supervised models check we ll use the dataset_reviews.csv

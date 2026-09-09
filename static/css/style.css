@@ -1,0 +1,121 @@
+*{
+    box-sizing: border-box;
+}
+body{
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+h1{
+    font-size: 12pt;
+}
+nav{
+    overflow: hidden;
+    background-color: #222222;
+    
+}
+nav a{
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 15px;
+}
+.file-input-container {
+            text-align: center;
+        }
+
+input[type="file"] {
+            display: none;
+        }
+label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+label:hover {
+            background-color: #0056b3;
+        }      
+
+
+.page-title {
+    text-align: center;
+    margin-top: 20px;
+}
+.top-header{
+    margin-top: 15%;
+}
+.csv-dropzone{
+    border: 2px dashed #007bff;
+    border-radius: 5px;
+    padding: 40px;
+    text-align: center;
+    color: #007bff;
+    font-size: 18px;
+    margin: 20px auto;
+    width: 80%;
+}
+.dataframe{
+    margin: 20px auto;
+    width: 80%;
+    border-collapse: collapse;
+    border: 1px solid;
+    border-color: #000000;
+    text-align: center;
+
+
+}
+.page-subtitle{
+    text-align: left;
+    margin-top: 20px;
+    margin-left: 8%;
+    margin-right: 8%;
+    
+}
+thead{
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+}
+th{
+    text-align: center;
+
+}
+td{
+    border: 1px solid;
+    border-color: #000000;
+    padding: 8px;
+    text-align: center;
+    background-color: #ffffff;
+}
+.page-description{
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+
+}
+@media screen and (max-width: 600px) {
+    nav a{
+        float: none;
+        width: 100%;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    nav a{
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 15px;
+    }
+}
